@@ -5,199 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skole-Spotify | Playliste Viser</title>
     <style>
-        :root {
-            --spotify-green: #1DB954;
-            --bg-black: #121212;
-            --card-bg: #181818;
-            --input-bg: #282828;
-            --text-main: #ffffff;
-            --text-sub: #b3b3b3;
-        }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-black);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0;
-            padding: 15px;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        h2 { color: var(--spotify-green); margin: 0 0 15px 0; font-size: 1.2rem; }
-        
-        .input-group {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid #333;
-            background: var(--input-bg);
-            color: white;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        input:focus { border-color: var(--spotify-green); }
-
-        .btn-main {
-            background-color: var(--spotify-green);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-main:hover { background-color: #1ed760; transform: scale(1.03); }
-
-        #status-area {
-            font-size: 0.8rem;
-            color: var(--text-sub);
-            padding-top: 10px;
-            border-top: 1px solid #333;
-        }
-
-        #status-area a {
-            color: var(--spotify-green);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        #embed-container {
-            width: 100%;
-            max-width: 800px;
-            min-height: 500px;
-            margin-top: 10px;
-        }
-
-        .suggestions {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-        }
-
-        .suggestions h3 { font-size: 0.9rem; color: var(--text-sub); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .suggestion-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .suggest-btn {
-            background: var(--input-bg);
-            color: white;
-            border: 1px solid #444;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .suggest-btn:hover {
-            background: var(--spotify-green);
-            border-color: var(--spotify-green);
-        }
-
-        .error { color: #ff5252; font-size: 0.85rem; margin-top: 8px; display: none; }
+        :root { --spotify-green: #1DB954; --bg-black: #121212; --card-bg: #181818; --input-bg: #282828; --text-main: #ffffff; --text-sub: #b3b3b3; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-black); color: var(--text-main); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 15px; }
+        .container { background-color: var(--card-bg); padding: 1.2rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 100%; max-width: 450px; text-align: center; margin-bottom: 10px; }
+        h2 { color: var(--spotify-green); margin: 0 0 12px 0; font-size: 1.1rem; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 10px; }
+        input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #333; background: var(--input-bg); color: white; font-size: 0.9rem; outline: none; }
+        .btn-main { background-color: var(--spotify-green); color: white; border: none; padding: 10px 18px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        #status-area { font-size: 0.75rem; color: var(--text-sub); border-top: 1px solid #333; padding-top: 8px; margin-top: 5px; }
+        #status-area a { color: var(--spotify-green); text-decoration: none; font-weight: bold; }
+        #embed-container { width: 100%; max-width: 800px; min-height: 500px; margin-top: 10px; }
+        .suggestions { margin-top: 20px; text-align: center; width: 100%; }
+        .suggestion-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .suggest-btn { background: var(--input-bg); color: white; border: 1px solid #444; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
+        .suggest-btn:hover { background: var(--spotify-green); border-color: var(--spotify-green); }
+        .error { color: #ff5252; font-size: 0.8rem; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Indsæt din playliste her</h2>
-    
     <div class="input-group">
         <input type="text" id="playlistInput" placeholder="Sæt link eller ID ind her...">
         <button class="btn-main" onclick="embedPlaylist()">Afspil</button>
     </div>
-    
     <div id="status-area">
         Loginstatus: <a href="https://accounts.spotify.com/da/login" target="_blank">[Klik her for at logge ind]</a>
-        <br>
-        <small style="font-size: 0.7rem;">(Husk at logge ind for at undgå 30-sekunders begrænsning)</small>
     </div>
-    
     <div id="errorMessage" class="error">Ugyldigt link eller ID. Prøv igen.</div>
 </div>
 
 <div id="embed-container"></div>
 
 <div class="suggestions">
-    <h3>Forslag til timen</h3>
     <div class="suggestion-grid">
-        <button class="suggest-btn" onclick="loadSuggested('37i9dQZEVXbMw2iUtFR5Eq')">🇩🇰 Top 50 Danmark</button>
-        <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1DX8Uebhn9wzrS')">☕ Lofi Beats</button>
-        <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1DX4WYpdgoIcn6')">🌿 Chill Hits</button>
-        <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1EIenKoRYMAPGb')">🎤 Dansk Pop</button>
+        <button class="suggest-btn" onclick="loadSuggested('37i9dQZEVXbMw2iUtFR5Eq')">🇩🇰 Top 50</button>
+        <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1DX8Uebhn9wzrS')">☕ Lofi</button>
+        <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1DX4WYpdgoIcn6')">🌿 Chill</button>
+        <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1EIenKoRYMAPGb')">🎤 Pop</button>
     </div>
 </div>
 
 <script>
-    // Tjekker URL når siden indlæses (GitHub Pages support)
     window.onload = function() {
         const hashId = window.location.hash.substring(1);
-        const urlParams = new URLSearchParams(window.location.search);
-        const queryId = urlParams.get('id');
-
-        if (hashId) {
-            loadSuggested(hashId);
-        } else if (queryId) {
-            loadSuggested(queryId);
-        }
+        if (hashId) { loadSuggested(hashId); }
     };
 
     function processInput(input) {
         let playlistId = '';
         const cleanInput = input.trim();
-
         if (cleanInput.includes('playlist/')) {
-            const parts = cleanInput.split('playlist/');
-            if (parts[1]) {
-                playlistId = parts[1].split('?')[0];
-            }
-        } 
-        else if (cleanInput.length >= 15 && /^[a-zA-Z0-9]+$/.test(cleanInput)) {
+            playlistId = cleanInput.split('playlist/')[1].split('?')[0];
+        } else if (cleanInput.length >= 15 && /^[a-zA-Z0-9]+$/.test(cleanInput)) {
             playlistId = cleanInput;
         }
         return playlistId;
     }
 
     function embedPlaylist(forcedId = null) {
-        const inputVal = document.getElementById('playlistInput').value;
-        const id = forcedId || processInput(inputVal);
+        const id = forcedId || processInput(document.getElementById('playlistInput').value);
         const container = document.getElementById('embed-container');
-        const errorMsg = document.getElementById('errorMessage');
-
         if (id) {
-            errorMsg.style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            // VIGTIGT: URL'en er ændret til det nye format og indeholder 'allow' parametre
             container.innerHTML = `
                 <iframe 
                     style="border-radius:12px" 
-                    src="https://open.spotify.com/embed/playlist/$${id}?utm_source=generator&theme=0" 
+                    src="https://open.spotify.com/embed/playlist/...2{id}?utm_source=generator" 
                     width="100%" 
                     height="500" 
                     frameBorder="0" 
@@ -205,16 +81,9 @@
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
                     loading="lazy">
                 </iframe>`;
-            
-            // Opdaterer URL'en i browseren så man kan kopiere det direkte link
             window.location.hash = id;
-            
-            if(forcedId) {
-                window.scrollTo({ top: container.offsetTop - 20, behavior: 'smooth' });
-            }
         } else {
-            errorMsg.style.display = 'block';
-            container.innerHTML = '';
+            document.getElementById('errorMessage').style.display = 'block';
         }
     }
 
@@ -224,10 +93,9 @@
     }
 
     document.getElementById('playlistInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') { embedPlaylist(); }
+        if (e.key === 'Enter') embedPlaylist();
     });
 </script>
 
 </body>
-
 </html>
