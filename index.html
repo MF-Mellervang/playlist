@@ -3,98 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skole-Spotify | Playliste Viser</title>
+    <title>Skole-Musik | Afspiller</title>
     <style>
-        :root { --spotify-green: #1DB954; --bg-black: #121212; --card-bg: #181818; --input-bg: #282828; --text-main: #ffffff; --text-sub: #b3b3b3; }
+        :root { 
+            --spotify-green: #1DB954; 
+            --apple-red: #FA2D48;
+            --telmore-blue: #0050ff;
+            --yousee-green: #00bf69;
+            --bg-black: #121212; 
+            --card-bg: #181818; 
+            --input-bg: #282828; 
+            --text-main: #ffffff; 
+            --text-sub: #b3b3b3; 
+        }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-black); color: var(--text-main); display: flex; flex-direction: column; align-items: center; margin: 0; padding: 15px; }
-        .container { background-color: var(--card-bg); padding: 1.2rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 100%; max-width: 450px; text-align: center; margin-bottom: 10px; }
-        h2 { color: var(--spotify-green); margin: 0 0 12px 0; font-size: 1.1rem; }
+        
+        .container { background-color: var(--card-bg); padding: 1.2rem; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 100%; max-width: 550px; text-align: center; margin-bottom: 10px; }
+        
+        .service-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn { background: #333; color: white; border: none; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; font-weight: bold; transition: 0.2s; }
+        .tab-btn.active.spotify { background: var(--spotify-green); }
+        .tab-btn.active.apple { background: var(--apple-red); }
+        .tab-btn.active.telmore { background: var(--telmore-blue); }
+        .tab-btn.active.yousee { background: var(--yousee-green); }
+
         .input-group { display: flex; gap: 8px; margin-bottom: 10px; }
         input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #333; background: var(--input-bg); color: white; font-size: 0.9rem; outline: none; }
-        .btn-main { background-color: var(--spotify-green); color: white; border: none; padding: 10px 18px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        
+        .btn-main { color: white; border: none; padding: 10px 18px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .spotify-theme { background-color: var(--spotify-green); }
+        .apple-theme { background-color: var(--apple-red); }
+
         #status-area { font-size: 0.75rem; color: var(--text-sub); border-top: 1px solid #333; padding-top: 8px; margin-top: 5px; }
-        #status-area a { color: var(--spotify-green); text-decoration: none; font-weight: bold; }
-        #embed-container { width: 100%; max-width: 800px; min-height: 500px; margin-top: 10px; }
+        #status-area a { text-decoration: none; font-weight: bold; }
+
+        #embed-container { width: 100%; max-width: 800px; min-height: 500px; margin-top: 10px; display: flex; justify-content: center; }
+        
         .suggestions { margin-top: 20px; text-align: center; width: 100%; }
         .suggestion-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
         .suggest-btn { background: var(--input-bg); color: white; border: 1px solid #444; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
-        .suggest-btn:hover { background: var(--spotify-green); border-color: var(--spotify-green); }
+        
+        .info-box { padding: 30px; color: #b3b3b3; font-size: 0.95rem; line-height: 1.6; }
+        .external-link { color: white; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 15px; }
+
         .error { color: #ff5252; font-size: 0.8rem; margin-top: 5px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Indsæt din playliste her</h2>
-    <div class="input-group">
-        <input type="text" id="playlistInput" placeholder="Sæt link eller ID ind her...">
-        <button class="btn-main" onclick="embedPlaylist()">Afspil</button>
+    <div class="service-tabs">
+        <button id="tab-spotify" class="tab-btn active spotify" onclick="switchService('spotify')">Spotify</button>
+        <button id="tab-apple" class="tab-btn apple" onclick="switchService('apple')">Apple Music</button>
+        <button id="tab-telmore" class="tab-btn telmore" onclick="switchService('telmore')">Telmore Musik</button>
+        <button id="tab-yousee" class="tab-btn yousee" onclick="switchService('yousee')">YouSee Musik</button>
     </div>
+
+    <h2 id="service-title">Indsæt Spotify playliste</h2>
+    
+    <div id="input-section">
+        <form onsubmit="event.preventDefault(); embedMusic();">
+            <div class="input-group">
+                <input type="text" id="musicInput" name="music-history" placeholder="Indsæt link eller ID..." autocomplete="on">
+                <button type="submit" id="main-btn" class="btn-main spotify-theme">Afspil</button>
+            </div>
+        </form>
+    </div>
+
     <div id="status-area">
-        Loginstatus: <a href="https://accounts.spotify.com/da/login" target="_blank">[Klik her for at logge ind]</a>
+        <span id="status-text">Loginstatus (Spotify):</span> 
+        <a id="login-link" href="https://accounts.spotify.com/login" target="_blank" style="color: var(--spotify-green);">[Log ind her]</a>
     </div>
     <div id="errorMessage" class="error">Ugyldigt link eller ID. Prøv igen.</div>
 </div>
 
 <div id="embed-container"></div>
 
-<div class="suggestions">
-    <div class="suggestion-grid">
+<div class="suggestions" id="suggestions-box">
+    <div id="spotify-suggestions" class="suggestion-grid">
         <button class="suggest-btn" onclick="loadSuggested('37i9dQZEVXbMw2iUtFR5Eq')">🇩🇰 Top 50</button>
         <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1DX8Uebhn9wzrS')">☕ Lofi</button>
         <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1DX4WYpdgoIcn6')">🌿 Chill</button>
         <button class="suggest-btn" onclick="loadSuggested('37i9dQZF1EIenKoRYMAPGb')">🎤 Pop</button>
     </div>
+    <div id="apple-suggestions" class="suggestion-grid" style="display:none;">
+        <button class="suggest-btn" onclick="loadSuggested('pl.d08496850bc840a4874e877177a69f9f')">🇩🇰 Top 100</button>
+        <button class="suggest-btn" onclick="loadSuggested('pl.1d5ead185d8a4a9089f3b952770b762c')">☕ Lofi</button>
+        <button class="suggest-btn" onclick="loadSuggested('pl.c74ebd652d9f40a1b92dec44dc422a32')">🌿 Pure Chill</button>
+    </div>
 </div>
 
 <script>
-    window.onload = function() {
-        const hashId = window.location.hash.substring(1);
-        if (hashId) { loadSuggested(hashId); }
-    };
+    let currentService = 'spotify';
 
-    function processInput(input) {
-        let playlistId = '';
-        const cleanInput = input.trim();
-        if (cleanInput.includes('playlist/')) {
-            playlistId = cleanInput.split('playlist/')[1].split('?')[0];
-        } else if (cleanInput.length >= 15 && /^[a-zA-Z0-9]+$/.test(cleanInput)) {
-            playlistId = cleanInput;
+    function switchService(service) {
+        currentService = service;
+        const title = document.getElementById('service-title');
+        const btn = document.getElementById('main-btn');
+        const loginLink = document.getElementById('login-link');
+        const statusText = document.getElementById('status-text');
+        const inputSection = document.getElementById('input-section');
+        const statusArea = document.getElementById('status-area');
+        const suggestionsBox = document.getElementById('suggestions-box');
+        const container = document.getElementById('embed-container');
+        
+        document.getElementById('errorMessage').style.display = 'none';
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        if (service === 'spotify') {
+            document.getElementById('tab-spotify').classList.add('active');
+            inputSection.style.display = 'block';
+            statusArea.style.display = 'block';
+            suggestionsBox.style.display = 'block';
+            title.innerText = "Indsæt Spotify playliste";
+            btn.className = "btn-main spotify-theme";
+            loginLink.href = "https://accounts.spotify.com/login";
+            loginLink.style.color = "var(--spotify-green)";
+            statusText.innerText = "Loginstatus (Spotify):";
+            document.getElementById('spotify-suggestions').style.display = 'flex';
+            document.getElementById('apple-suggestions').style.display = 'none';
+            container.innerHTML = '';
+        } 
+        else if (service === 'apple') {
+            document.getElementById('tab-apple').classList.add('active');
+            inputSection.style.display = 'block';
+            statusArea.style.display = 'block';
+            suggestionsBox.style.display = 'block';
+            title.innerText = "Indsæt Apple Music playliste";
+            btn.className = "btn-main apple-theme";
+            loginLink.href = "https://music.apple.com/login";
+            loginLink.style.color = "var(--apple-red)";
+            statusText.innerText = "Loginstatus (Apple):";
+            document.getElementById('spotify-suggestions').style.display = 'none';
+            document.getElementById('apple-suggestions').style.display = 'flex';
+            container.innerHTML = '';
         }
-        return playlistId;
+        else if (service === 'telmore') {
+            document.getElementById('tab-telmore').classList.add('active');
+            inputSection.style.display = 'none';
+            statusArea.style.display = 'none';
+            suggestionsBox.style.display = 'none';
+            title.innerText = "Telmore Musik";
+            container.innerHTML = `
+                <div class="info-box">
+                    Telmore Musik kører på sin egen side.<br>
+                    Du kan kun tilgå dine egne playlister i skoletiden.<br><br>
+                    <a href="https://musik.telmore.dk/min-musik/playlister" target="_blank" class="external-link" style="background: var(--telmore-blue);">
+                        Åbn Telmore Playlister
+                    </a>
+                </div>`;
+        }
+        else if (service === 'yousee') {
+            document.getElementById('tab-yousee').classList.add('active');
+            inputSection.style.display = 'none';
+            statusArea.style.display = 'none';
+            suggestionsBox.style.display = 'none';
+            title.innerText = "YouSee Musik";
+            container.innerHTML = `
+                <div class="info-box">
+                    YouSee Musik kører på sin egen side.<br>
+                    Du kan kun tilgå dine egne playlister i skoletiden.<br><br>
+                    <a href="https://musik.yousee.dk/min-musik/playlister" target="_blank" class="external-link" style="background: var(--yousee-green);">
+                        Åbn YouSee Playlister
+                    </a>
+                </div>`;
+        }
     }
 
-    function embedPlaylist(forcedId = null) {
-        const id = forcedId || processInput(document.getElementById('playlistInput').value);
+    function embedMusic(forcedId = null) {
+        const input = document.getElementById('musicInput').value.trim();
+        const id = forcedId || parseId(input);
         const container = document.getElementById('embed-container');
-        if (id) {
-            document.getElementById('errorMessage').style.display = 'none';
-            // VIGTIGT: URL'en er ændret til det nye format og indeholder 'allow' parametre
-            container.innerHTML = `
-                <iframe 
-                    style="border-radius:12px" 
-                    src="https://open.spotify.com/embed/playlist/...2{id}?utm_source=generator" 
-                    width="100%" 
-                    height="500" 
-                    frameBorder="0" 
-                    allowfullscreen="" 
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-                    loading="lazy">
-                </iframe>`;
-            window.location.hash = id;
-        } else {
+        
+        if (!id) {
             document.getElementById('errorMessage').style.display = 'block';
+            return;
+        }
+
+        document.getElementById('errorMessage').style.display = 'none';
+        
+        if (currentService === 'spotify') {
+            container.innerHTML = `<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/${id}?utm_source=generator&theme=0" width="100%" height="500" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+        } else if (currentService === 'apple') {
+            container.innerHTML = `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="500" style="width:100%;max-width:800px;overflow:hidden;border-radius:12px;" src="https://embed.music.apple.com/dk/playlist/${id}"></iframe>`;
+        }
+    }
+
+    function parseId(input) {
+        if (currentService === 'spotify') {
+            if (input.includes('playlist/')) return input.split('playlist/')[1].split('?')[0];
+            return input.length >= 15 ? input : null;
+        } else {
+            if (input.includes('playlist/')) {
+                const parts = input.split('playlist/')[1].split('/');
+                return parts[parts.length - 1].split('?')[0];
+            }
+            return input.startsWith('pl.') ? input : null;
         }
     }
 
     function loadSuggested(id) {
-        document.getElementById('playlistInput').value = id;
-        embedPlaylist(id);
+        document.getElementById('musicInput').value = id;
+        embedMusic(id);
     }
-
-    document.getElementById('playlistInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') embedPlaylist();
-    });
 </script>
 
 </body>
